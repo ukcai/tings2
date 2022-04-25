@@ -4,10 +4,10 @@ import time
 import discord.ext
 from discord.utils import get
 from discord.ext import commands, tasks
-from discord.ext.commands import has_permissions,  CheckFailure, check     
-
-
-#^ basic imports for other features of discord.py and python
+from discord.ext.commands import has_permissions, CheckFailure, check     
+import webserver
+import urllib
+import json
 
 
 client = discord.Client()
@@ -17,6 +17,35 @@ client = commands.Bot(command_prefix = '!') #put your own prefix here
 @client.event
 async def on_ready():
     print("bot online") #will print "bot online" in the console when the bot is online
+
+@client.command()
+@commands.has_permissions(kick_members=True)
+async def warn(ctx,member : discord.Member,*,reason="no reason given"):
+  if member == ctx.author:
+    await ctx.send("you cant warn yourself")
+  else:
+    em = discord.Embed(title="**warned**", description=f"{member} was warned because {reason}", color=discord.Color.red())
+    em2 = discord.Embed(title="**warned**", description=f"you were warned because {reason}", color=discord.Color.red())
+    await member.send(embed=em2)
+    await ctx.send(embed=em)
+    
+
+@client.command()
+async def meme(ctx):
+  memeApi = urllib.request.urlopen('https://meme-api.herokuapp.com/gimme')
+
+  memeData = json.load(memeApi)
+
+  memeUrl =memeData['url']
+  memeName = memeData['title']
+  memePoster = memeData['author']
+  memeLink = memeData['postLink']
+
+  embed = discord.Embed(title=memeName)
+  embed.set_image(url=memeUrl)
+  embed.set_footer(text=f"meme by {memePoster}")
+  await ctx.send(embed=embed)
+  
     
     
 @client.command()
